@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      SNYK_CFG_ORG: c0040cec-8f74-4d0e-812e-d38d3efcbfbe
       
     steps:
       - uses: actions/checkout@v4
@@ -46,8 +47,14 @@ jobs:
       - name: Verify Snyk auth
         run: snyk whoami --experimental
 
-      - name: Snyk Code test
-        run: snyk code test --sarif > snyk-code.sarif || true
+     - name: Snyk Code test
+        run: snyk code test --sarif-file-output=snyk-code.sarif || true
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v4
+        if: hashFiles('snyk-code.sarif') != ''
+        with:
+          sarif_file: snyk-code.sarif
 
       - name: Snyk Open Source monitor
         run: snyk monitor --all-projects
