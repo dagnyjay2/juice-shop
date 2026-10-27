@@ -61,6 +61,14 @@ jobs:
         if: hashFiles('snyk-oss.json') != ''
         run: npx --yes snyk-to-html -i snyk-oss.json -o snyk-oss.html
 
+      - name: Upload Snyk HTML report
+        if: ${{ always() && hashFiles('snyk-oss.html') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-oss-report
+          path: snyk-oss.html
+          retention-days: 30
+
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v4
         if: hashFiles('snyk-code.sarif') != ''
